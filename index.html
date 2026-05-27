@@ -1,37 +1,401 @@
-<!doctype html>https://github.com/dwallman1-pixel/stock-screener/blob/b09cd362f4b7ef5d003198c16aaf3b5f2856331c/README.md#L9
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Stock Screener</title>
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin: 2rem; background: #f7f9fc; color: #0b1a2b; }
-    .container { max-width: 980px; margin: 0 auto; padding: 1rem; background: #fff; border-radius: 8px; box-shadow: 0 8px 24px rgba(11,26,43,0.06); }
-    header { margin-bottom: 1rem; }
-    h1 { margin: 0 0 0.25rem 0; font-size: 1.5rem; }
-    p.lead { margin: 0; color: #556; }
+    :root {
+      color-scheme: light;
+      --bg: #f7f9fc;
+      --surface: #ffffff;
+      --text: #0b1a2b;
+      --muted: #556;
+      --border: #d8e0ea;
+      --accent: #2563eb;
+      --accent-soft: rgba(37,99,235,0.1);
+      --danger: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid rgba(15,23,42,.08);
+      box-shadow: 0 20px 50px rgba(15,23,42,.08);
+    }
+
+    header {
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 2.5vw, 2.5rem);
+      letter-spacing: -0.03em;
+    }
+
+    p.lead {
+      margin: 0.4rem 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .controls {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-bottom: 1.5rem;
+    }
+
+    .control {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      font: inherit;
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .toolbar p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border: none;
+      border-radius: 999px;
+      padding: 0.85rem 1.25rem;
+      font: inherit;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .button.secondary {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .button.danger {
+      background: var(--danger);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    thead {
+      background: #f1f5f9;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 0.95rem 1rem;
+      border-bottom: 1px solid rgba(15,23,42,.07);
+      font-size: 0.95rem;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    tbody tr:hover {
+      background: rgba(37,99,235,0.04);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .empty-state {
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    @media (max-width: 680px) {
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <h1>Stock Screener</h1>
-      <p class="lead">A minimal starter page for the stock-screener project.</p>
+      <p class="lead">Filter companies by symbol, price, market cap, P/E ratio, and sector. This is a client-side screener for prototyping screening rules quickly.</p>
     </header>
 
-    <main>
-      <section>
-        <p id="status">Initializing...</p>
-      </section>
-    </main>
+    <section class="controls" aria-label="Filter controls">
+      <div class="control">
+        <label for="search">Search symbol or company</label>
+        <input id="search" type="search" placeholder="AAPL, Microsoft, energy..." />
+      </div>
 
-    <footer style="margin-top:1rem;font-size:0.9rem;color:#667;">
-      Ready — modify this file to start building the UI.
+      <div class="control">
+        <label for="sector">Sector</label>
+        <select id="sector">
+          <option value="">All sectors</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label for="minPrice">Min price</label>
+        <input id="minPrice" type="number" min="0" step="0.01" placeholder="0" />
+      </div>
+
+      <div class="control">
+        <label for="maxPrice">Max price</label>
+        <input id="maxPrice" type="number" min="0" step="0.01" placeholder="1000" />
+      </div>
+
+      <div class="control">
+        <label for="minMarketCap">Min market cap ($B)</label>
+        <input id="minMarketCap" type="number" min="0" step="1" placeholder="0" />
+      </div>
+
+      <div class="control">
+        <label for="maxPe">Max P/E ratio</label>
+        <input id="maxPe" type="number" min="0" step="0.1" placeholder="50" />
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <p id="resultCount">Showing 0 stocks</p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+        <button class="button" id="applyFilters">Apply filters</button>
+        <button class="button secondary" id="resetFilters">Reset filters</button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table aria-label="Stock results">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Company</th>
+            <th>Sector</th>
+            <th>Price</th>
+            <th>Market Cap</th>
+            <th>P/E</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+
+    <footer style="margin-top:1.5rem;font-size:0.95rem;color:#667;">
+      Built as a lightweight starter screener using static data and browser filters.
     </footer>
   </div>
 
   <script>
-    document.getElementById('status').textContent = 'Hello — stock screener initialized.';
+    const stocks = [
+      { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology', price: 185.40, marketCap: 2854, pe: 28.7 },
+      { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology', price: 364.21, marketCap: 2750, pe: 32.1 },
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Communication Services', price: 135.10, marketCap: 1710, pe: 24.9 },
+      { symbol: 'AMZN', name: 'Amazon.com, Inc.', sector: 'Consumer Discretionary', price: 182.73, marketCap: 1820, pe: 53.7 },
+      { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Technology', price: 100.53, marketCap: 1465, pe: 52.8 },
+      { symbol: 'TSLA', name: 'Tesla, Inc.', sector: 'Consumer Discretionary', price: 215.09, marketCap: 676, pe: 37.4 },
+      { symbol: 'JPM', name: 'JPMorgan Chase & Co.', sector: 'Financials', price: 157.44, marketCap: 485, pe: 11.5 },
+      { symbol: 'JNJ', name: 'Johnson & Johnson', sector: 'Health Care', price: 149.12, marketCap: 383, pe: 18.2 },
+      { symbol: 'XOM', name: 'Exxon Mobil Corporation', sector: 'Energy', price: 113.76, marketCap: 445, pe: 9.8 },
+      { symbol: 'V', name: 'Visa Inc.', sector: 'Financials', price: 250.32, marketCap: 516, pe: 32.5 },
+      { symbol: 'PEP', name: 'PepsiCo, Inc.', sector: 'Consumer Staples', price: 212.88, marketCap: 321, pe: 27.1 },
+      { symbol: 'NFLX', name: 'Netflix, Inc.', sector: 'Communication Services', price: 483.53, marketCap: 215, pe: 28.8 },
+      { symbol: 'CVX', name: 'Chevron Corporation', sector: 'Energy', price: 172.65, marketCap: 320, pe: 12.9 },
+      { symbol: 'WMT', name: 'Walmart Inc.', sector: 'Consumer Staples', price: 160.48, marketCap: 446, pe: 28.3 },
+      { symbol: 'KO', name: 'The Coca-Cola Company', sector: 'Consumer Staples', price: 67.05, marketCap: 292, pe: 26.4 },
+    ];
+
+    const refs = {
+      search: document.getElementById('search'),
+      sector: document.getElementById('sector'),
+      minPrice: document.getElementById('minPrice'),
+      maxPrice: document.getElementById('maxPrice'),
+      minMarketCap: document.getElementById('minMarketCap'),
+      maxPe: document.getElementById('maxPe'),
+      resultsBody: document.getElementById('resultsBody'),
+      resultCount: document.getElementById('resultCount'),
+      applyFilters: document.getElementById('applyFilters'),
+      resetFilters: document.getElementById('resetFilters'),
+    };
+
+    function formatMoney(value) {
+      return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function formatMarketCap(value) {
+      return `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}B`;
+    }
+
+    function renderStocks(list) {
+      refs.resultsBody.innerHTML = '';
+
+      if (!list.length) {
+        refs.resultCount.textContent = 'No stocks matched your filters.';
+        refs.resultsBody.innerHTML = '<tr><td colspan="6" class="empty-state">Try a broader search or remove a filter.</td></tr>';
+        return;
+      }
+
+      refs.resultCount.textContent = `Showing ${list.length} stock${list.length === 1 ? '' : 's'}`;
+
+      const rows = list.map(stock => `
+        <tr>
+          <td><strong>${stock.symbol}</strong></td>
+          <td>${stock.name}</td>
+          <td>${stock.sector}</td>
+          <td>${formatMoney(stock.price)}</td>
+          <td>${formatMarketCap(stock.marketCap)}</td>
+          <td>${stock.pe.toFixed(1)}</td>
+        </tr>
+      `);
+
+      refs.resultsBody.innerHTML = rows.join('');
+    }
+
+    function getUniqueSectors() {
+      return [...new Set(stocks.map(stock => stock.sector))].sort();
+    }
+
+    function applyFilterValues() {
+      const searchTerm = refs.search.value.trim().toLowerCase();
+      const sector = refs.sector.value;
+      const minPrice = parseFloat(refs.minPrice.value);
+      const maxPrice = parseFloat(refs.maxPrice.value);
+      const minMarketCap = parseFloat(refs.minMarketCap.value);
+      const maxPe = parseFloat(refs.maxPe.value);
+
+      const filtered = stocks.filter(stock => {
+        if (searchTerm && !(`${stock.symbol} ${stock.name}`.toLowerCase().includes(searchTerm))) {
+          return false;
+        }
+
+        if (sector && stock.sector !== sector) {
+          return false;
+        }
+
+        if (!Number.isNaN(minPrice) && stock.price < minPrice) {
+          return false;
+        }
+
+        if (!Number.isNaN(maxPrice) && stock.price > maxPrice) {
+          return false;
+        }
+
+        if (!Number.isNaN(minMarketCap) && stock.marketCap < minMarketCap) {
+          return false;
+        }
+
+        if (!Number.isNaN(maxPe) && stock.pe > maxPe) {
+          return false;
+        }
+
+        return true;
+      });
+
+      renderStocks(filtered);
+    }
+
+    function resetFilters() {
+      refs.search.value = '';
+      refs.sector.value = '';
+      refs.minPrice.value = '';
+      refs.maxPrice.value = '';
+      refs.minMarketCap.value = '';
+      refs.maxPe.value = '';
+      renderStocks(stocks);
+    }
+
+    function initialize() {
+      getUniqueSectors().forEach(sector => {
+        const option = document.createElement('option');
+        option.value = sector;
+        option.textContent = sector;
+        refs.sector.appendChild(option);
+      });
+
+      refs.applyFilters.addEventListener('click', applyFilterValues);
+      refs.resetFilters.addEventListener('click', resetFilters);
+      renderStocks(stocks);
+    }
+
+    initialize();
   </script>
 </body>
 </html>
